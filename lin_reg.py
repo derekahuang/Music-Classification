@@ -83,7 +83,7 @@ with sess.as_default():
 	curr_loss = sess.run(loss, feed_dict={X: data_te, y: label_te})
 	print ("The initial loss is: ", curr_loss)
 
-	sess.run(GD_step, feed_dict={X: x_tr, y: y_tr})
+	# sess.run(GD_step, feed_dict={X: x_tr, y: y_tr})
 
 	nepochs = 50
 	epoch_size = int(data_tr.shape[0] / epoch)

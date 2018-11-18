@@ -38,6 +38,7 @@ D = x_tr.shape[1] # dimensionality of the data
 C = y_tr.shape[1] # number of unique labels in the dataset
 
 # hyperparameters
+epoch = 100
 H1 = 2048 # number of hidden units. 
 H2 = 1024
 H3 = 512
