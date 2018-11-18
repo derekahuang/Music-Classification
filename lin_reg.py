@@ -96,8 +96,9 @@ with sess.as_default():
 			y_tr = label_tr[indices] #[labels[v] for v in indices]
 
 			_, train_pred = sess.run([GD_step, y_hat], feed_dict={X: x_tr, y: y_tr})
-			train_loss = tf.equal(tf.argmax(train_pred, 1), tf.argmax(label_tr, 1))
+			train_loss = tf.equal(tf.argmax(train_pred, 1), tf.argmax(y_tr, 1))
 			training_mean += tf.reduce_mean(tf.cast(correctly_predicted, tf.float32)).eval()
+		print("Training accuracy: ", training_mean / epoch_size)
 
 	curr_loss, pred = sess.run([loss, y_hat], feed_dict={X: data_te, y: label_te})
 	print()
