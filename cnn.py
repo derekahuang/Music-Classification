@@ -31,7 +31,7 @@ label_cv = temp
 del temp
 
 m,n = data_cv.shape
-data_tr = data_cv.reshape([m,n,1,1])
+data_cv = data_cv.reshape([m,n,1,1])
 m,n = data_te.shape
 data_te = data_te.reshape([m,n,1,1])
 m,n = data_tr.shape
@@ -144,9 +144,10 @@ with sess.as_default():
 			x_tr = data_tr[indices] #[data[v] for v in indices]
 			y_tr = label_tr[indices] #[labels[v] for v in indices]
 
-			sess.run(GD_step, feed_dict={X: x_tr, Y: y_tr})
+			_, l = sess.run([GD_step, loss], feed_dict={X: x_tr, Y: y_tr})
+			print(l.eval())
 		if i % 5 == 0:
-			_, eval_pred = sess.run([GD_step, y_hat], feed_dict={X: data_cv, y: label_cv})
+			_, eval_pred = sess.run([GD_step, y_hat], feed_dict={X: data_cv, Y: label_cv})
 			eval_accuracy = tf.equal(tf.argmax(eval_pred, 1), tf.argmax(label_cv, 1))
 			print("Eval accuracy: ", tf.reduce_mean(tf.cast(eval_accuracy, tf.float32)).eval())
 
