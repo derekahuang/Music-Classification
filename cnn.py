@@ -126,7 +126,7 @@ with sess.as_default():
 
 			sess.run(GD_step, feed_dict={X: x_tr, Y: y_tr})
 
-	curr_loss, pred = sess.run([loss, y_hat], feed_dict={X: data_te, y: label_te})
+	curr_loss, pred = sess.run([loss, y_hat], feed_dict={X: data_te, Y: label_te})
 	print()
 	print ("The final training loss is: ", curr_loss)
 	correctly_predicted = tf.equal(tf.argmax(pred, 1), tf.argmax(label_te, 1)) 

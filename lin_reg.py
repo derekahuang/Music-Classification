@@ -94,8 +94,8 @@ with sess.as_default():
 
 	nepochs = 50
 	epoch_size = int(data_tr.shape[0] / epoch)
-	training_mean = 0
 	for i in trange(nepochs):
+		training_mean = 0
 		r = np.random.permutation(data_tr.shape[0])
 		for j in trange(epoch_size):
 			indices = r[j*epoch:(j+1)*epoch]
