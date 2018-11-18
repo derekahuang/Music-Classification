@@ -87,6 +87,7 @@ with sess.as_default():
 
 	nepochs = 50
 	epoch_size = int(data_tr.shape[0] / epoch)
+	training_mean = 0
 	for i in trange(nepochs):
 		r = np.random.permutation(data_tr.shape[0])
 		for j in trange(epoch_size):
@@ -94,7 +95,9 @@ with sess.as_default():
 			x_tr = data_tr[indices] #[data[v] for v in indices]
 			y_tr = label_tr[indices] #[labels[v] for v in indices]
 
-			sess.run(GD_step, feed_dict={X: x_tr, y: y_tr})
+			_, train_pred = sess.run([GD_step, y_hat], feed_dict={X: x_tr, y: y_tr})
+			train_loss = tf.equal(tf.argmax(train_pred, 1), tf.argmax(label_tr, 1))
+			training_mean += tf.reduce_mean(tf.cast(correctly_predicted, tf.float32)).eval()
 
 	curr_loss, pred = sess.run([loss, y_hat], feed_dict={X: data_te, y: label_te})
 	print()
