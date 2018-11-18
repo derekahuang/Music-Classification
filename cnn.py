@@ -7,15 +7,30 @@ import random
 import math
 from tqdm import tqdm, trange
 
-data = np.load('samples.npy')
-labels = np.load('labels.npy')#[:,0:1]
+training = np.load('gtzan/gtzan_tr.npy')
+data_tr = np.delete(training, -1, 1)
+label_tr = training[:,-1]
 
-m,n = data.shape
-print(data[0])
-data = data.reshape([m,n,1,1])
-print(data[0])
+test = np.load('gtzan/gtzan_te.npy')
+data_te = np.delete(test, -1, 1)
+label_te = test[:,-1]
 
-indices = random.sample(range(0, 35200), 100)
+temp = np.zeros((len(label_tr),10))
+temp[np.arange(len(label_tr)),label_tr.astype(int)] = 1
+label_tr = temp
+temp = np.zeros((len(label_te),10))
+temp[np.arange(len(label_te)),label_te.astype(int)] = 1
+label_te = temp
+del temp
+m,n = data_te.shape
+data_te = data_te.reshape([m,n,1,1])
+m,n = data_tr.shape
+data_tr = data_tr.reshape([m,n,1,1])
+
+
+
+
+indices = random.sample(range(0, m), 100)
 
 x_tr = data[indices] #[data[v] for v in indices]
 y_tr = labels[indices] #[labels[v] for v in indices]
@@ -101,10 +116,8 @@ h2 = tf.nn.relu(tf.matmul(h1,W_h2) + b_h2)
 h3 = tf.nn.relu(tf.matmul(h2,W_h3) + b_h3)
 y_hat = tf.nn.softmax(tf.matmul(h3, W_o) + b_o)
 
-l = tf.square(tf.add(y_hat, -Y))
-loss = tf.reduce_mean(tf.add(l, l))
-
-vector_loss = tf.reduce_mean(tf.add(l, l), 0)
+loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits( 
+                        labels=y, logits=y_hat)) 
 
 GD_step = tf.train.AdamOptimizer(lr).minimize(loss)
 
@@ -112,26 +125,28 @@ sess = tf.Session()
 init = tf.global_variables_initializer()
 sess.run(init)
 
-curr_loss = sess.run(loss, feed_dict={X: data, Y: labels})
-print ("The initial loss is: ", curr_loss)
+with sess.as_default():
+	curr_loss = sess.run(loss, feed_dict={X: data_te, Y: label_te})
+	print ("The initial loss is: ", curr_loss)
 
-sess.run(GD_step, feed_dict={X: x_tr, Y: y_tr})
+	sess.run(GD_step, feed_dict={X: x_tr, Y: y_tr})
 
-nepochs = 50
-for i in trange(nepochs):
-	r = np.random.permutation(35200)
-	for j in trange(352):
-		indices = r[j*100:(j+1)*100]
-		x_tr = data[indices] #[data[v] for v in indices]
-		y_tr = labels[indices] #[labels[v] for v in indices]
+	nepochs = 2
+	epoch_size = int(data_tr.shape[0] / epoch)
+	for i in trange(nepochs):
+		r = np.random.permutation(data_tr.shape[0])
+		for j in trange(epoch_size):
+			indices = r[j*epoch:(j+1)*epoch]
+			x_tr = data_tr[indices] #[data[v] for v in indices]
+			y_tr = label_tr[indices] #[labels[v] for v in indices]
 
-		sess.run(GD_step, feed_dict={X: x_tr, Y: y_tr})
+			sess.run(GD_step, feed_dict={X: x_tr, Y: y_tr})
 
-curr_loss = sess.run(loss, feed_dict={X: data, Y: labels})
-vector_loss = sess.run(vector_loss, feed_dict={X: data, Y: labels})
-print()
-print("The vectorized loss is: ", vector_loss)
-
-print ("The final training loss is: ", curr_loss)
+	curr_loss, pred = sess.run([loss, y_hat], feed_dict={X: data_te, y: label_te})
+	# vector_loss = sess.run(vector_loss, feed_dict={X: data, y: labels})
+	print()
+	# print("The vectorized loss is: ", vector_loss)
+	print ("The final training loss is: ", curr_loss)
+	correctly_predicted = tf.equal(tf.argmax(pred, 1), tf.argmax(label_te, 1)) 
+	print('argmax accuracy:', tf.reduce_mean(tf.cast(correctly_predicted, tf.float32)).eval())
                  
-sess.close()

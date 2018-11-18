@@ -34,10 +34,6 @@ N = x_tr.shape[0] # number of training examples
 D = x_tr.shape[1] # dimensionality of the data
 C = 10 # number of unique labels in the dataset
 
-def accuracy(predictions, labels): 
-	correctly_predicted = tf.equal(tf.argmax(predictions, 1), tf.argmax(labels, 1)) 
-	print('argmax accuracy:', tf.reduce_mean(tf.cast(correctly_predicted, tf.float32)).eval())
-
 # hyperparameters
 epoch = 100
 H1 = 2048 # number of hidden units. In general try to stick to a power of 2
