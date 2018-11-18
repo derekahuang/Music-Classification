@@ -63,7 +63,7 @@ NC2 = 16 # number of channels
 
 P = 4 # number of max pooling * pooling window size
 
-lr = .001 # the learning rate (previously refered to in the notes as alpha)
+lr = .01 # the learning rate (previously refered to in the notes as alpha)
 
 #weights and initialization 
 
@@ -136,11 +136,12 @@ with sess.as_default():
 	sess.run(GD_step, feed_dict={X: x_tr, Y: y_tr})
 
 	nepochs = 20
+	r = np.random.permutation(data_tr.shape[0])
 	epoch_size = int(data_tr.shape[0] / epoch)
 	for i in trange(nepochs):
 		m = 0
-		r = np.random.permutation(data_tr.shape[0])
-		for j in trange(epoch_size):
+		
+		for j in trange(1):
 			indices = r[j*epoch:(j+1)*epoch]
 			x_tr = data_tr[indices] #[data[v] for v in indices]
 			y_tr = label_tr[indices] #[labels[v] for v in indices]
