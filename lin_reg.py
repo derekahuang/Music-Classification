@@ -7,38 +7,45 @@ import random
 import math
 from tqdm import tqdm, trange
 
-data = np.load('samples.npy')
-labels = np.load('labels.npy')#[:,0:1]
+training = np.load('gtzan/gtzan_tr.npy')
+data_tr = np.delete(training, -1, 1)
+label_tr = training[:,-1]
 
-indices = random.sample(range(0, 35200), 100)
+test = np.load('gtzan/gtzan_te.npy')
+data_te = np.delete(test, -1, 1)
+label_te = test[:,-1]
 
-x_tr = data[indices] #[data[v] for v in indices]
-y_tr = labels[indices] #[labels[v] for v in indices]
+temp = np.zeros((len(label_tr),10))
+temp[np.arange(len(label_tr)),label_tr.astype(int)] = 1
+label_tr = temp
+temp = np.zeros((len(label_te),10))
+temp[np.arange(len(label_te)),label_te.astype(int)] = 1
+label_te = temp
+del temp
+
+indices = random.sample(range(0, data_tr.shape[0]), 100)
+
+x_tr = data_tr[indices] #[data[v] for v in indices]
+y_tr = label_tr[indices] #[labels[v] for v in indices]
+print(y_tr.shape)
 
 # general parameters
 N = x_tr.shape[0] # number of training examples
 D = x_tr.shape[1] # dimensionality of the data
-C = y_tr.shape[1] # number of unique labels in the dataset
+C = 10 # number of unique labels in the dataset
 
-def equation(x):
-	return 440 * (2 ** (1/float(12))) ** (x - 49)
-
-#mapping from frequencies to indices 
-
-# mapping = {}
-# for i in range(1, 89):
-# 	mapping[math.floor(equation(i))] = i
-
-# for i in range(len(y_tr)):
-# 	y_tr[i][0] = mapping[math.floor(y_tr[i][0])]
+def accuracy(predictions, labels): 
+	correctly_predicted = tf.equal(tf.argmax(predictions, 1), tf.argmax(labels, 1)) 
+	print('argmax accuracy:', tf.reduce_mean(tf.cast(correctly_predicted, tf.float32)).eval())
 
 # hyperparameters
+epoch = 100
 H1 = 2048 # number of hidden units. In general try to stick to a power of 2
 H2 = 1024
 H3 = 512
-H4 = 256
-H5 = 128
-H6 = 64
+# H4 = 256
+# H5 = 128
+# H6 = 64
 lr = .00001 # the learning rate (previously refered to in the notes as alpha)
 
 W_h1 = tf.Variable(tf.random_normal((D,H1), stddev = 0.01)) # mean=0.0
@@ -59,37 +66,36 @@ h2 = tf.nn.relu(tf.matmul(h1,W_h2) + b_h2)
 h3 = tf.nn.relu(tf.matmul(h2,W_h3) + b_h3)
 y_hat = tf.nn.softmax(tf.matmul(h3, W_o) + b_o)
 
-l = tf.square(tf.add(y_hat, -y))
-loss = tf.reduce_mean(tf.add(l, l))
-
-vector_loss = tf.reduce_mean(tf.add(l, l), 0)
+loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits( 
+                        labels=y, logits=y_hat)) 
 
 GD_step = tf.train.AdamOptimizer(lr).minimize(loss)
 
 sess = tf.Session()
 init = tf.global_variables_initializer()
 sess.run(init)
+with sess.as_default():
+	curr_loss = sess.run(loss, feed_dict={X: data_te, y: label_te})
+	print ("The initial loss is: ", curr_loss)
 
-curr_loss = sess.run(loss, feed_dict={X: data, y: labels})
-print ("The initial loss is: ", curr_loss)
+	sess.run(GD_step, feed_dict={X: x_tr, y: y_tr})
 
-sess.run(GD_step, feed_dict={X: x_tr, y: y_tr})
+	nepochs = 2
+	epoch_size = int(data_tr.shape[0] / epoch)
+	for i in trange(nepochs):
+		r = np.random.permutation(data_tr.shape[0])
+		for j in trange(epoch_size):
+			indices = r[j*epoch:(j+1)*epoch]
+			x_tr = data_tr[indices] #[data[v] for v in indices]
+			y_tr = label_tr[indices] #[labels[v] for v in indices]
 
-nepochs = 50
-for i in trange(nepochs):
-	r = np.random.permutation(35200)
-	for j in trange(352):
-		indices = r[j*100:(j+1)*100]
-		x_tr = data[indices] #[data[v] for v in indices]
-		y_tr = labels[indices] #[labels[v] for v in indices]
+			sess.run(GD_step, feed_dict={X: x_tr, y: y_tr})
 
-		sess.run(GD_step, feed_dict={X: x_tr, y: y_tr})
-
-curr_loss = sess.run(loss, feed_dict={X: data, y: labels})
-vector_loss = sess.run(vector_loss, feed_dict={X: data, y: labels})
-print()
-print("The vectorized loss is: ", vector_loss)
-
-print ("The final training loss is: ", curr_loss)
+	curr_loss, pred = sess.run([loss, y_hat], feed_dict={X: data_te, y: label_te})
+	# vector_loss = sess.run(vector_loss, feed_dict={X: data, y: labels})
+	print()
+	# print("The vectorized loss is: ", vector_loss)
+	print ("The final training loss is: ", curr_loss)
+	correctly_predicted = tf.equal(tf.argmax(pred, 1), tf.argmax(label_te, 1)) 
+	print('argmax accuracy:', tf.reduce_mean(tf.cast(correctly_predicted, tf.float32)).eval())
                  
-sess.close()
