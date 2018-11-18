@@ -65,14 +65,20 @@ W2 = tf.Variable(tf.truncated_normal([C2D,1,NC1,NC2], stddev=0.001))
 b2 = tf.Variable(tf.truncated_normal([NC2], stddev=0.001))
 
 # Fully Connected feed-forward
-W_h1 = tf.Variable(tf.truncated_normal([int((D/P)*NC2),H1], stddev = 0.01)) # mean=0.0
-W_h2 = tf.Variable(tf.truncated_normal([H1,H2], stddev = 0.01)) # mean=0.0
-W_h3 = tf.Variable(tf.truncated_normal([H2,H3], stddev = 0.01)) # mean=0.0
-W_o = tf.Variable(tf.truncated_normal([H3,C], stddev = 0.01)) # mean=0.0
+W_h1 = tf.Variable(tf.random_normal((D,H1), stddev = 0.01)) # mean=0.0
+W_h2 = tf.Variable(tf.random_normal((H1,H2), stddev = 0.01)) # mean=0.0
+W_h3 = tf.Variable(tf.random_normal((H2,H3), stddev = 0.01)) # mean=0.0
+W_h4 = tf.Variable(tf.random_normal((H3,H4), stddev = 0.01)) # mean=0.0
+W_h5 = tf.Variable(tf.random_normal((H4,H5), stddev = 0.01)) # mean=0.0
+W_h6 = tf.Variable(tf.random_normal((H5,H6), stddev = 0.01)) # mean=0.0
+W_o = tf.Variable(tf.random_normal((H6,C), stddev = 0.01)) # mean=0.0
 
 b_h1 = tf.Variable(tf.zeros((1, H1)))
 b_h2 = tf.Variable(tf.zeros((1, H2)))
 b_h3 = tf.Variable(tf.zeros((1, H3)))
+b_h4 = tf.Variable(tf.zeros((1, H4)))
+b_h5 = tf.Variable(tf.zeros((1, H5)))
+b_h6 = tf.Variable(tf.zeros((1, H6)))
 b_o = tf.Variable(tf.zeros((1, C)))
 
 # Convolution 1
