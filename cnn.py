@@ -141,8 +141,8 @@ with sess.as_default():
 	for i in trange(nepochs):
 		m = 0
 		
-		for j in trange(1):
-			indices = r[j*epoch:(j+1)*epoch]
+		for j in trange(10):
+			# indices = r[j*epoch:(j+1)*epoch]
 			x_tr = data_tr[indices] #[data[v] for v in indices]
 			y_tr = label_tr[indices] #[labels[v] for v in indices]
 

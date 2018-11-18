@@ -93,7 +93,7 @@ with sess.as_default():
 
 	# sess.run(GD_step, feed_dict={X: x_tr, y: y_tr})
 
-	nepochs = 50
+	nepochs = 16
 	epoch_size = int(data_tr.shape[0] / epoch)
 	for i in trange(nepochs):
 		training_mean = 0
