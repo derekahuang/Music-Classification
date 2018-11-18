@@ -15,12 +15,19 @@ test = np.load('gtzan/gtzan_te.npy')
 data_te = np.delete(test, -1, 1)
 label_te = test[:,-1]
 
+cv = np.load('gtzan/gtzan_cv.npy')
+data_cv = np.delete(cv, -1, 1)
+label_cv = test[:,-1]
+
 temp = np.zeros((len(label_tr),10))
 temp[np.arange(len(label_tr)),label_tr.astype(int)] = 1
 label_tr = temp
 temp = np.zeros((len(label_te),10))
 temp[np.arange(len(label_te)),label_te.astype(int)] = 1
 label_te = temp
+temp = np.zeros((len(label_cv),10))
+temp[np.arange(len(label_cv)),label_cv.astype(int)] = 1
+label_cv = temp
 del temp
 
 indices = random.sample(range(0, data_tr.shape[0]), 100)
@@ -97,8 +104,11 @@ with sess.as_default():
 
 			_, train_pred = sess.run([GD_step, y_hat], feed_dict={X: x_tr, y: y_tr})
 			train_loss = tf.equal(tf.argmax(train_pred, 1), tf.argmax(y_tr, 1))
-			training_mean += tf.reduce_mean(tf.cast(correctly_predicted, tf.float32)).eval()
+			training_mean += tf.reduce_mean(tf.cast(train_loss, tf.float32)).eval()
 		print("Training accuracy: ", training_mean / epoch_size)
+		_, eval_pred = sess.run([GD_step, y_hat], feed_dict={X: data_cv, y: label_cv})
+		eval_accuracy = tf.equal(tf.argmax(eval_pred, 1), tf.argmax(label_cv, 1))
+		print("Eval accuracy: ", tf.reduce_mean(tf.cast(eval_accuracy, tf.float32)).eval())
 
 	curr_loss, pred = sess.run([loss, y_hat], feed_dict={X: data_te, y: label_te})
 	print()
