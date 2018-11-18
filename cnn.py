@@ -53,7 +53,7 @@ NC2 = 16 # number of channels
 
 P = 4 # number of max pooling * pooling window size
 
-lr = .00001 # the learning rate (previously refered to in the notes as alpha)
+lr = .001 # the learning rate (previously refered to in the notes as alpha)
 
 #weights and initialization 
 
@@ -98,7 +98,11 @@ C2_out_mp = tf.reshape(C2_out_mp,[-1, int((D/P)*NC2)])
 h1 = tf.nn.relu(tf.matmul(C2_out_mp,W_h1) + b_h1)
 h2 = tf.nn.relu(tf.matmul(h1,W_h2) + b_h2)
 h3 = tf.nn.relu(tf.matmul(h2,W_h3) + b_h3)
-y_hat = tf.nn.softmax(tf.matmul(h3, W_o) + b_o)
+d1 = tf.nn.dropout(h3, .3)
+h4 = tf.nn.relu(tf.matmul(d1,W_h4) + b_h4)
+h5 = tf.nn.relu(tf.matmul(h4,W_h5) + b_h5)
+h6 = tf.nn.relu(tf.matmul(h5,W_h6) + b_h6)
+y_hat = tf.nn.softmax(tf.matmul(h6, W_o) + b_o)
 
 loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits( 
                         labels=Y, logits=y_hat)) 
@@ -115,7 +119,7 @@ with sess.as_default():
 
 	sess.run(GD_step, feed_dict={X: x_tr, Y: y_tr})
 
-	nepochs = 1
+	nepochs = 50
 	epoch_size = int(data_tr.shape[0] / epoch)
 	for i in trange(nepochs):
 		r = np.random.permutation(data_tr.shape[0])
