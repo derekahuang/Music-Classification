@@ -32,8 +32,8 @@ data_tr = data_tr.reshape([m,n,1,1])
 
 indices = random.sample(range(0, m), 100)
 
-x_tr = data[indices] #[data[v] for v in indices]
-y_tr = labels[indices] #[labels[v] for v in indices]
+x_tr = data_tr[indices] #[data[v] for v in indices]
+y_tr = label_tr[indices] #[labels[v] for v in indices]
 
 # general parameters
 N = x_tr.shape[0] # number of training examples
@@ -117,7 +117,7 @@ h3 = tf.nn.relu(tf.matmul(h2,W_h3) + b_h3)
 y_hat = tf.nn.softmax(tf.matmul(h3, W_o) + b_o)
 
 loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits( 
-                        labels=y, logits=y_hat)) 
+                        labels=Y, logits=y_hat)) 
 
 GD_step = tf.train.AdamOptimizer(lr).minimize(loss)
 
