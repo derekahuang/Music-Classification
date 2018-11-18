@@ -39,19 +39,25 @@ epoch = 100
 H1 = 2048 # number of hidden units. In general try to stick to a power of 2
 H2 = 1024
 H3 = 512
-# H4 = 256
-# H5 = 128
-# H6 = 64
+H4 = 256
+H5 = 128
+H6 = 64
 lr = .00001 # the learning rate (previously refered to in the notes as alpha)
 
 W_h1 = tf.Variable(tf.random_normal((D,H1), stddev = 0.01)) # mean=0.0
 W_h2 = tf.Variable(tf.random_normal((H1,H2), stddev = 0.01)) # mean=0.0
 W_h3 = tf.Variable(tf.random_normal((H2,H3), stddev = 0.01)) # mean=0.0
-W_o = tf.Variable(tf.random_normal((H3,C), stddev = 0.01)) # mean=0.0
+W_h4 = tf.Variable(tf.random_normal((H3,H4), stddev = 0.01)) # mean=0.0
+W_h5 = tf.Variable(tf.random_normal((H4,H5), stddev = 0.01)) # mean=0.0
+W_h6 = tf.Variable(tf.random_normal((H5,H6), stddev = 0.01)) # mean=0.0
+W_o = tf.Variable(tf.random_normal((H6,C), stddev = 0.01)) # mean=0.0
 
 b_h1 = tf.Variable(tf.zeros((1, H1)))
 b_h2 = tf.Variable(tf.zeros((1, H2)))
 b_h3 = tf.Variable(tf.zeros((1, H3)))
+b_h4 = tf.Variable(tf.zeros((1, H4)))
+b_h5 = tf.Variable(tf.zeros((1, H5)))
+b_h6 = tf.Variable(tf.zeros((1, H6)))
 b_o = tf.Variable(tf.zeros((1, C)))
 
 X = tf.placeholder("float", shape=[None,D])
@@ -60,7 +66,10 @@ y = tf.placeholder("float", shape=[None,C])
 h1 = tf.nn.relu(tf.matmul(X,W_h1) + b_h1)
 h2 = tf.nn.relu(tf.matmul(h1,W_h2) + b_h2)
 h3 = tf.nn.relu(tf.matmul(h2,W_h3) + b_h3)
-y_hat = tf.nn.softmax(tf.matmul(h3, W_o) + b_o)
+h4 = tf.nn.relu(tf.matmul(h3,W_h4) + b_h4)
+h5 = tf.nn.relu(tf.matmul(h4,W_h5) + b_h5)
+h6 = tf.nn.relu(tf.matmul(h5,W_h6) + b_h6)
+y_hat = tf.nn.softmax(tf.matmul(h6, W_o) + b_o)
 
 loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits( 
                         labels=y, logits=y_hat)) 
