@@ -76,7 +76,7 @@ with sess.as_default():
 
 	sess.run(GD_step, feed_dict={X: x_tr, y: y_tr})
 
-	nepochs = 2
+	nepochs = 50
 	epoch_size = int(data_tr.shape[0] / epoch)
 	for i in trange(nepochs):
 		r = np.random.permutation(data_tr.shape[0])
@@ -88,9 +88,7 @@ with sess.as_default():
 			sess.run(GD_step, feed_dict={X: x_tr, y: y_tr})
 
 	curr_loss, pred = sess.run([loss, y_hat], feed_dict={X: data_te, y: label_te})
-	# vector_loss = sess.run(vector_loss, feed_dict={X: data, y: labels})
 	print()
-	# print("The vectorized loss is: ", vector_loss)
 	print ("The final training loss is: ", curr_loss)
 	correctly_predicted = tf.equal(tf.argmax(pred, 1), tf.argmax(label_te, 1)) 
 	print('argmax accuracy:', tf.reduce_mean(tf.cast(correctly_predicted, tf.float32)).eval())

@@ -27,9 +27,6 @@ data_te = data_te.reshape([m,n,1,1])
 m,n = data_tr.shape
 data_tr = data_tr.reshape([m,n,1,1])
 
-
-
-
 indices = random.sample(range(0, m), 100)
 
 x_tr = data_tr[indices] #[data[v] for v in indices]
@@ -39,20 +36,6 @@ y_tr = label_tr[indices] #[labels[v] for v in indices]
 N = x_tr.shape[0] # number of training examples
 D = x_tr.shape[1] # dimensionality of the data
 C = y_tr.shape[1] # number of unique labels in the dataset
-
-
-
-def equation(x):
-	return 440 * (2 ** (1/float(12))) ** (x - 49)
-
-#mapping from frequencies to indices 
-
-# mapping = {}
-# for i in range(1, 89):
-# 	mapping[math.floor(equation(i))] = i
-
-# for i in range(len(y_tr)):
-# 	y_tr[i][0] = mapping[math.floor(y_tr[i][0])]
 
 # hyperparameters
 H1 = 2048 # number of hidden units. 
@@ -131,7 +114,7 @@ with sess.as_default():
 
 	sess.run(GD_step, feed_dict={X: x_tr, Y: y_tr})
 
-	nepochs = 2
+	nepochs = 50
 	epoch_size = int(data_tr.shape[0] / epoch)
 	for i in trange(nepochs):
 		r = np.random.permutation(data_tr.shape[0])
@@ -143,9 +126,7 @@ with sess.as_default():
 			sess.run(GD_step, feed_dict={X: x_tr, Y: y_tr})
 
 	curr_loss, pred = sess.run([loss, y_hat], feed_dict={X: data_te, y: label_te})
-	# vector_loss = sess.run(vector_loss, feed_dict={X: data, y: labels})
 	print()
-	# print("The vectorized loss is: ", vector_loss)
 	print ("The final training loss is: ", curr_loss)
 	correctly_predicted = tf.equal(tf.argmax(pred, 1), tf.argmax(label_te, 1)) 
 	print('argmax accuracy:', tf.reduce_mean(tf.cast(correctly_predicted, tf.float32)).eval())
