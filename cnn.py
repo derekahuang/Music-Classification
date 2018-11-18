@@ -145,9 +145,9 @@ with sess.as_default():
 			x_tr = data_tr[indices] #[data[v] for v in indices]
 			y_tr = label_tr[indices] #[labels[v] for v in indices]
 
-			_, l = sess.run([GD_step, y_hat], feed_dict={X: x_tr, Y: y_tr})
-			eval_accuracy = tf.equal(tf.argmax(eval_pred, 1), tf.argmax(y_tr, 1))
-			m += f.reduce_mean(tf.cast(eval_accuracy, tf.float32)).eval()
+		_, l = sess.run([GD_step, y_hat], feed_dict={X: x_tr, Y: y_tr})
+		eval_accuracy = tf.equal(tf.argmax(l, 1), tf.argmax(y_tr, 1))
+		m += tf.reduce_mean(tf.cast(eval_accuracy, tf.float32)).eval()
 		print("Training", m)
 
 	curr_loss, pred = sess.run([loss, y_hat], feed_dict={X: data_te, Y: label_te})
