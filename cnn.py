@@ -149,11 +149,12 @@ with sess.as_default():
 			_, l = sess.run([GD_step, y_hat], feed_dict={X: x_tr, Y: y_tr})
 			eval_accuracy = tf.equal(tf.argmax(l, 1), tf.argmax(y_tr, 1))
 			m += tf.reduce_mean(tf.cast(eval_accuracy, tf.float32)).eval()
-		print("Training", m)
-
+		print("Training", m/10)
+	l, = sess.run(loss, feed_dict={X: data_tr[indices], Y: label_tr[indices]})
+	print("Training Loss: ", l)
 	curr_loss, pred = sess.run([loss, y_hat], feed_dict={X: data_te, Y: label_te})
 	print()
-	print ("The final training loss is: ", curr_loss)
+	print ("The final loss is: ", curr_loss)
 	correctly_predicted = tf.equal(tf.argmax(pred, 1), tf.argmax(label_te, 1)) 
 	print('argmax accuracy:', tf.reduce_mean(tf.cast(correctly_predicted, tf.float32)).eval())
                  
