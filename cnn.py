@@ -45,7 +45,7 @@ y_tr = label_tr[indices] #[labels[v] for v in indices]
 # general parameters
 N = x_tr.shape[0] # number of training examples
 D = x_tr.shape[1] # dimensionality of the data
-C = y_tr.shape[1] # number of unique labels in the dataset
+C = 10 # number of unique labels in the dataset
 
 # hyperparameters
 epoch = 100
@@ -149,8 +149,8 @@ with sess.as_default():
 			_, l = sess.run([GD_step, y_hat], feed_dict={X: x_tr, Y: y_tr})
 			eval_accuracy = tf.equal(tf.argmax(l, 1), tf.argmax(y_tr, 1))
 			m += tf.reduce_mean(tf.cast(eval_accuracy, tf.float32)).eval()
-		print("Training", m/10)
-	l, = sess.run(loss, feed_dict={X: data_tr[indices], Y: label_tr[indices]})
+			print("Training", m)
+	l = sess.run(loss, feed_dict={X: data_tr[indices], Y: label_tr[indices]})
 	print("Training Loss: ", l)
 	curr_loss, pred = sess.run([loss, y_hat], feed_dict={X: data_te, Y: label_te})
 	print()
