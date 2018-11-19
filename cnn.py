@@ -37,7 +37,7 @@ data_te = data_te.reshape([m,n,1,1])
 m,n = data_tr.shape
 data_tr = data_tr.reshape([m,n,1,1])
 
-epoch = 1000
+epoch = 500
 
 indices = random.sample(range(0, m), epoch)
 
@@ -150,8 +150,7 @@ with sess.as_default():
 
 			_, l = sess.run([GD_step, y_hat], feed_dict={X: x_tr, Y: y_tr})
 			eval_accuracy = tf.equal(tf.argmax(l, 1), tf.argmax(y_tr, 1))
-			m += tf.reduce_mean(tf.cast(eval_accuracy, tf.float32)).eval()
-			print("Training", m)
+			print("Iter accuracy: ", tf.reduce_mean(tf.cast(eval_accuracy, tf.float32)).eval())
 	l = sess.run(loss, feed_dict={X: data_tr[indices], Y: label_tr[indices]})
 	print("Training Loss: ", l)
 	curr_loss, pred = sess.run([loss, y_hat], feed_dict={X: data_te, Y: label_te})
