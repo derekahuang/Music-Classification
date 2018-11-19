@@ -37,7 +37,7 @@ data_te = data_te.reshape([m,n,1,1])
 m,n = data_tr.shape
 data_tr = data_tr.reshape([m,n,1,1])
 
-epoch = 500
+epoch = 200
 
 indices = random.sample(range(0, m), epoch)
 
@@ -51,7 +51,7 @@ C = 10 # number of unique labels in the dataset
 
 # hyperparameters
 
-H1 = 2048 # number of hidden units. 
+H1 = 1000 # number of hidden units. 
 H2 = 1024
 H3 = 512
 H4 = 256
@@ -65,7 +65,7 @@ NC2 = 16 # number of channels
 
 P = 4 # number of max pooling * pooling window size
 
-lr = .00001 # the learning rate (previously refered to in the notes as alpha)
+lr = .0001 # the learning rate (previously refered to in the notes as alpha)
 
 #weights and initialization 
 
@@ -83,7 +83,7 @@ W_h2 = tf.Variable(tf.truncated_normal([H1,H2], stddev = 0.01)) # mean=0.0
 W_h3 = tf.Variable(tf.truncated_normal([H2,H3], stddev = 0.01)) # mean=0.0
 W_h4 = tf.Variable(tf.truncated_normal([H3,H4], stddev = 0.01)) # mean=0.0
 W_h5 = tf.Variable(tf.truncated_normal([H4,H5], stddev = 0.01)) # mean=0.0
-W_h6 = tf.Variable(tf.truncated_normal([H5,H6], stddev = 0.01)) # mean=0.0
+W_h6 = tf.Variable(tf.truncated_normal([H1,H6], stddev = 0.01)) # mean=0.0
 W_o = tf.Variable(tf.truncated_normal([H6,C], stddev = 0.01)) # mean=0.0
 
 b_h1 = tf.Variable(tf.zeros((1, H1)))
@@ -117,11 +117,12 @@ C2_out_mp = tf.reshape(C2_out_mp,[-1, int((D/P)*NC2)])
 h1 = tf.nn.relu(tf.matmul(C2_out_mp,W_h1) + b_h1)
 # h2 = tf.nn.relu(tf.matmul(h1,W_h2) + b_h2)
 # h3 = tf.nn.relu(tf.matmul(h2,W_h3) + b_h3)
-# d1 = tf.nn.dropout(h3, .3)
+# d1 = tf.nn.dropout(h1, .3)
 # h4 = tf.nn.relu(tf.matmul(d1,W_h4) + b_h4)
 # h5 = tf.nn.relu(tf.matmul(h4,W_h5) + b_h5)
 h6 = tf.nn.relu(tf.matmul(h1,W_h6) + b_h6)
-y_hat = tf.nn.softmax(tf.matmul(h6, W_o) + b_o)
+y_hat = (tf.matmul(h6, W_o) + b_o)
+# y_hat = tf.matmul((h6, W_o) + b_o)
 
 loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits( 
                         labels=Y, logits=y_hat)) 
@@ -136,27 +137,22 @@ with sess.as_default():
 	curr_loss = sess.run(loss, feed_dict={X: data_te, Y: label_te})
 	print ("The initial loss is: ", curr_loss)
 
-	sess.run(GD_step, feed_dict={X: x_tr, Y: y_tr})
-
-	nepochs = 20
-	r = np.random.permutation(data_tr.shape[0])
+	nepochs = 6
 	epoch_size = int(data_tr.shape[0] / epoch)
 	for i in trange(nepochs):
-		m = 0
-		
-		for j in trange(100):
+		r = np.random.permutation(data_tr.shape[0])
+		for j in trange(epoch_size):
 			indices = r[j*epoch:(j+1)*epoch]
 			x_tr = data_tr[indices] #[data[v] for v in indices]
 			y_tr = label_tr[indices] #[labels[v] for v in indices]
 
-			_, l = sess.run([GD_step, y_hat], feed_dict={X: data_te, Y: label_te})
-			eval_accuracy = tf.equal(tf.argmax(l, 1), tf.argmax(label_te, 1))
+			_, l, cur_loss = sess.run([GD_step, y_hat, loss], feed_dict={X: x_tr, Y: y_tr})
+			eval_accuracy = tf.equal(tf.argmax(l, 1), tf.argmax(y_tr, 1))
 			print("Iter accuracy: ", tf.reduce_mean(tf.cast(eval_accuracy, tf.float32)).eval())
-			l = sess.run(loss, feed_dict={X: data_tr[indices], Y: label_tr[indices]})
-			print("Training Loss: ", l)
-	curr_loss, pred = sess.run([loss, y_hat], feed_dict={X: data_te, Y: label_te})
-	print()
-	print ("The final loss is: ", curr_loss)
-	correctly_predicted = tf.equal(tf.argmax(pred, 1), tf.argmax(label_te, 1)) 
-	print('argmax accuracy:', tf.reduce_mean(tf.cast(correctly_predicted, tf.float32)).eval())
+			print("Training Loss: ", cur_loss)
+			curr_loss, pred = sess.run([loss, y_hat], feed_dict={X: data_te, Y: label_te})
+			print()
+			print ("The final loss is: ", curr_loss)
+			correctly_predicted = tf.equal(tf.argmax(pred, 1), tf.argmax(label_te, 1)) 
+			print('argmax accuracy:', tf.reduce_mean(tf.cast(correctly_predicted, tf.float32)).eval())
                  

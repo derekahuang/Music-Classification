@@ -49,7 +49,7 @@ H3 = 512
 H4 = 256
 H5 = 128
 H6 = 64
-lr = .001 # the learning rate (previously refered to in the notes as alpha)
+lr = .000001 # the learning rate (previously refered to in the notes as alpha)
 
 W_h1 = tf.Variable(tf.random_normal((D,H1), stddev = 0.01)) # mean=0.0
 W_h2 = tf.Variable(tf.random_normal((H1,H2), stddev = 0.01)) # mean=0.0
@@ -73,11 +73,11 @@ y = tf.placeholder("float", shape=[None,C])
 h1 = tf.nn.relu(tf.matmul(X,W_h1) + b_h1)
 h2 = tf.nn.relu(tf.matmul(h1,W_h2) + b_h2)
 h3 = tf.nn.relu(tf.matmul(h2,W_h3) + b_h3)
-d1 = tf.nn.dropout(h3, .3)
+d1 = tf.nn.dropout(h3, .5)
 h4 = tf.nn.relu(tf.matmul(d1,W_h4) + b_h4)
 h5 = tf.nn.relu(tf.matmul(h4,W_h5) + b_h5)
 h6 = tf.nn.relu(tf.matmul(h5,W_h6) + b_h6)
-y_hat = tf.nn.softmax(tf.matmul(h6, W_o) + b_o)
+y_hat = (tf.matmul(h6, W_o) + b_o) 
 
 loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits( 
                         labels=y, logits=y_hat)) 
@@ -93,23 +93,28 @@ with sess.as_default():
 
 	# sess.run(GD_step, feed_dict={X: x_tr, y: y_tr})
 
-	nepochs = 16
+	nepochs = 100
 	epoch_size = int(data_tr.shape[0] / epoch)
 	for i in trange(nepochs):
 		training_mean = 0
-		r = np.random.permutation(data_tr.shape[0])
+		x_tr = None
+		y_tr = None
 		for j in trange(epoch_size):
+			r = np.random.permutation(data_tr.shape[0])
 			indices = r[j*epoch:(j+1)*epoch]
 			x_tr = data_tr[indices] #[data[v] for v in indices]
 			y_tr = label_tr[indices] #[labels[v] for v in indices]
 
 			_, train_pred = sess.run([GD_step, y_hat], feed_dict={X: x_tr, y: y_tr})
-			train_loss = tf.equal(tf.argmax(train_pred, 1), tf.argmax(y_tr, 1))
-			training_mean += tf.reduce_mean(tf.cast(train_loss, tf.float32)).eval()
-		print("Training accuracy: ", training_mean / epoch_size)
-		_, eval_pred = sess.run([GD_step, y_hat], feed_dict={X: data_cv, y: label_cv})
-		eval_accuracy = tf.equal(tf.argmax(eval_pred, 1), tf.argmax(label_cv, 1))
-		print("Eval accuracy: ", tf.reduce_mean(tf.cast(eval_accuracy, tf.float32)).eval())
+		train_pred = sess.run(y_hat, feed_dict={X: x_tr, y: y_tr})
+		train_loss = tf.equal(tf.argmax(train_pred, 1), tf.argmax(y_tr, 1))
+		training_mean = tf.reduce_mean(tf.cast(train_loss, tf.float32)).eval()
+		print("Training accuracy: ", training_mean )
+		val_loss, val_acc = sess.run([loss,y_hat], feed_dict={X: data_te, y:label_te})
+		print("Validation Loss: ", val_loss)
+		train_loss = tf.equal(tf.argmax(val_acc, 1), tf.argmax(label_te, 1))
+		training_mean = tf.reduce_mean(tf.cast(train_loss, tf.float32)).eval()
+		print("Validation Accuracy: ", training_mean)
 
 	curr_loss, pred = sess.run([loss, y_hat], feed_dict={X: data_te, y: label_te})
 	print()
