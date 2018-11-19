@@ -37,7 +37,9 @@ data_te = data_te.reshape([m,n,1,1])
 m,n = data_tr.shape
 data_tr = data_tr.reshape([m,n,1,1])
 
-indices = random.sample(range(0, m), 100)
+epoch = 1000
+
+indices = random.sample(range(0, m), epoch)
 
 x_tr = data_tr[indices] #[data[v] for v in indices]
 y_tr = label_tr[indices] #[labels[v] for v in indices]
@@ -48,7 +50,7 @@ D = x_tr.shape[1] # dimensionality of the data
 C = 10 # number of unique labels in the dataset
 
 # hyperparameters
-epoch = 100
+
 H1 = 2048 # number of hidden units. 
 H2 = 1024
 H3 = 512
