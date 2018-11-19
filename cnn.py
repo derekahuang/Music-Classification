@@ -115,12 +115,12 @@ C2_out_mp = tf.nn.max_pool(C2_out, ksize = [1,2,1,1], strides = [1,2,1,1], paddi
 C2_out_mp = tf.reshape(C2_out_mp,[-1, int((D/P)*NC2)])  
 
 h1 = tf.nn.relu(tf.matmul(C2_out_mp,W_h1) + b_h1)
-h2 = tf.nn.relu(tf.matmul(h1,W_h2) + b_h2)
-h3 = tf.nn.relu(tf.matmul(h2,W_h3) + b_h3)
-d1 = tf.nn.dropout(h3, .3)
-h4 = tf.nn.relu(tf.matmul(d1,W_h4) + b_h4)
-h5 = tf.nn.relu(tf.matmul(h4,W_h5) + b_h5)
-h6 = tf.nn.relu(tf.matmul(h5,W_h6) + b_h6)
+# h2 = tf.nn.relu(tf.matmul(h1,W_h2) + b_h2)
+# h3 = tf.nn.relu(tf.matmul(h2,W_h3) + b_h3)
+# d1 = tf.nn.dropout(h3, .3)
+# h4 = tf.nn.relu(tf.matmul(d1,W_h4) + b_h4)
+# h5 = tf.nn.relu(tf.matmul(h4,W_h5) + b_h5)
+h6 = tf.nn.relu(tf.matmul(h1,W_h6) + b_h6)
 y_hat = tf.nn.softmax(tf.matmul(h6, W_o) + b_o)
 
 loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits( 
