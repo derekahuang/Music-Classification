@@ -71,6 +71,7 @@ lr = .00001 # the learning rate (previously refered to in the notes as alpha)
 
 X = tf.placeholder("float", [None,D,1,1])
 Y = tf.placeholder("float", [None, C])
+
 W1 = tf.Variable(tf.truncated_normal([C1D,1,1,NC1], stddev=0.001))
 b1 = tf.Variable(tf.truncated_normal([NC1],stddev=0.001))
 W2 = tf.Variable(tf.truncated_normal([C2D,1,NC1,NC2], stddev=0.001))
@@ -151,8 +152,8 @@ with sess.as_default():
 			_, l = sess.run([GD_step, y_hat], feed_dict={X: data_te, Y: label_te})
 			eval_accuracy = tf.equal(tf.argmax(l, 1), tf.argmax(label_te, 1))
 			print("Iter accuracy: ", tf.reduce_mean(tf.cast(eval_accuracy, tf.float32)).eval())
-	l = sess.run(loss, feed_dict={X: data_tr[indices], Y: label_tr[indices]})
-	print("Training Loss: ", l)
+			l = sess.run(loss, feed_dict={X: data_tr[indices], Y: label_tr[indices]})
+			print("Training Loss: ", l)
 	curr_loss, pred = sess.run([loss, y_hat], feed_dict={X: data_te, Y: label_te})
 	print()
 	print ("The final loss is: ", curr_loss)
