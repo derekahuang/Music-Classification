@@ -148,8 +148,8 @@ with sess.as_default():
 			x_tr = data_tr[indices] #[data[v] for v in indices]
 			y_tr = label_tr[indices] #[labels[v] for v in indices]
 
-			_, l = sess.run([GD_step, y_hat], feed_dict={X: data_cv, Y: label_cv})
-			eval_accuracy = tf.equal(tf.argmax(l, 1), tf.argmax(label_cv, 1))
+			_, l = sess.run([GD_step, y_hat], feed_dict={X: data_te, Y: label_te})
+			eval_accuracy = tf.equal(tf.argmax(l, 1), tf.argmax(label_te, 1))
 			print("Iter accuracy: ", tf.reduce_mean(tf.cast(eval_accuracy, tf.float32)).eval())
 	l = sess.run(loss, feed_dict={X: data_tr[indices], Y: label_tr[indices]})
 	print("Training Loss: ", l)
