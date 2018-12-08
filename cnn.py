@@ -59,13 +59,13 @@ H5 = 128
 H6 = 64
 
 C1D = 1024 # filter size
-NC1 = 16 # number of channels
+NC1 = 256 # number of channels
 C2D = 512 # filter size
 NC2 = 16 # number of channels
 
 P = 4 # number of max pooling * pooling window size
 
-lr = .0001 # the learning rate (previously refered to in the notes as alpha)
+lr = .00001 # the learning rate (previously refered to in the notes as alpha)
 
 #weights and initialization 
 
@@ -96,11 +96,11 @@ b_o = tf.Variable(tf.zeros((1, C)))
 
 # Convolution 1
 
-C1_out = tf.nn.conv2d(X, W1, [1,1,1,1], padding='SAME')                 
+C1_out = tf.nn.dropout(tf.nn.conv2d(X, W1, [1,1,1,1], padding='SAME'), .5)
 C1_out += b1
 C1_out = tf.nn.relu(C1_out)   
 
-C1_out_mp = tf.nn.max_pool(C1_out, ksize = [1,2,1,1], strides=[1,2,1,1], padding='SAME')
+C1_out_mp = tf.nn.max_pool(C1_out, ksize = [1,4,1,1], strides=[1,2,1,1], padding='SAME')
 
 # Convolution 2
 
@@ -109,7 +109,7 @@ C2_out += b2
 C2_out = tf.nn.relu(C2_out)  
 
 # Max Pooling 2
-C2_out_mp = tf.nn.max_pool(C2_out, ksize = [1,2,1,1], strides = [1,2,1,1], padding='SAME')        
+C2_out_mp = tf.nn.avg_pool(C2_out, ksize = [1,2,1,1], strides = [1,2,1,1], padding='SAME')        
 
 # Flatten
 C2_out_mp = tf.reshape(C2_out_mp,[-1, int((D/P)*NC2)])  
@@ -117,10 +117,10 @@ C2_out_mp = tf.reshape(C2_out_mp,[-1, int((D/P)*NC2)])
 h1 = tf.nn.relu(tf.matmul(C2_out_mp,W_h1) + b_h1)
 # h2 = tf.nn.relu(tf.matmul(h1,W_h2) + b_h2)
 # h3 = tf.nn.relu(tf.matmul(h2,W_h3) + b_h3)
-# d1 = tf.nn.dropout(h1, .3)
+d1 = tf.nn.dropout(h1, .3)
 # h4 = tf.nn.relu(tf.matmul(d1,W_h4) + b_h4)
 # h5 = tf.nn.relu(tf.matmul(h4,W_h5) + b_h5)
-h6 = tf.nn.relu(tf.matmul(h1,W_h6) + b_h6)
+h6 = tf.nn.relu(tf.matmul(d1,W_h6) + b_h6)
 y_hat = (tf.matmul(h6, W_o) + b_o)
 # y_hat = tf.matmul((h6, W_o) + b_o)
 
@@ -137,7 +137,7 @@ with sess.as_default():
 	curr_loss = sess.run(loss, feed_dict={X: data_te, Y: label_te})
 	print ("The initial loss is: ", curr_loss)
 
-	nepochs = 6
+	nepochs = 75
 	epoch_size = int(data_tr.shape[0] / epoch)
 	for i in trange(nepochs):
 		r = np.random.permutation(data_tr.shape[0])
@@ -148,11 +148,9 @@ with sess.as_default():
 
 			_, l, cur_loss = sess.run([GD_step, y_hat, loss], feed_dict={X: x_tr, Y: y_tr})
 			eval_accuracy = tf.equal(tf.argmax(l, 1), tf.argmax(y_tr, 1))
-			print("Iter accuracy: ", tf.reduce_mean(tf.cast(eval_accuracy, tf.float32)).eval())
-			print("Training Loss: ", cur_loss)
-			curr_loss, pred = sess.run([loss, y_hat], feed_dict={X: data_te, Y: label_te})
-			print()
-			print ("The final loss is: ", curr_loss)
-			correctly_predicted = tf.equal(tf.argmax(pred, 1), tf.argmax(label_te, 1)) 
-			print('argmax accuracy:', tf.reduce_mean(tf.cast(correctly_predicted, tf.float32)).eval())
+		curr_loss, pred = sess.run([loss, y_hat], feed_dict={X: data_te, Y: label_te})
+		print()
+		print ("The final loss is: ", curr_loss)
+		correctly_predicted = tf.equal(tf.argmax(pred, 1), tf.argmax(label_te, 1)) 
+		print('argmax accuracy:', tf.reduce_mean(tf.cast(correctly_predicted, tf.float32)).eval())
                  
