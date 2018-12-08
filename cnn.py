@@ -37,7 +37,7 @@ data_te = data_te.reshape([m,n,1,1])
 m,n = data_tr.shape
 data_tr = data_tr.reshape([m,n,1,1])
 
-epoch = 200
+epoch = 50
 
 indices = random.sample(range(0, m), epoch)
 
@@ -59,13 +59,13 @@ H5 = 128
 H6 = 64
 
 C1D = 1024 # filter size
-NC1 = 256 # number of channels
+NC1 = 128 # number of channels
 C2D = 512 # filter size
 NC2 = 16 # number of channels
 
 P = 4 # number of max pooling * pooling window size
 
-lr = .00001 # the learning rate (previously refered to in the notes as alpha)
+lr = .0000001 # the learning rate (previously refered to in the notes as alpha)
 
 #weights and initialization 
 
@@ -96,7 +96,7 @@ b_o = tf.Variable(tf.zeros((1, C)))
 
 # Convolution 1
 
-C1_out = tf.nn.dropout(tf.nn.conv2d(X, W1, [1,1,1,1], padding='SAME'), .5)
+C1_out = tf.nn.dropout(tf.nn.conv2d(X, W1, [1,1,1,1], padding='SAME'), 1)
 C1_out += b1
 C1_out = tf.nn.relu(C1_out)   
 
@@ -134,10 +134,11 @@ init = tf.global_variables_initializer()
 sess.run(init)
 
 with sess.as_default():
+	f = open('output_lr2.txt','w')
 	curr_loss = sess.run(loss, feed_dict={X: data_te, Y: label_te})
 	print ("The initial loss is: ", curr_loss)
 
-	nepochs = 75
+	nepochs = 100
 	epoch_size = int(data_tr.shape[0] / epoch)
 	for i in trange(nepochs):
 		r = np.random.permutation(data_tr.shape[0])
@@ -151,6 +152,10 @@ with sess.as_default():
 		curr_loss, pred = sess.run([loss, y_hat], feed_dict={X: data_te, Y: label_te})
 		print()
 		print ("The final loss is: ", curr_loss)
+		f.write("The final loss is: " + str(curr_loss))
 		correctly_predicted = tf.equal(tf.argmax(pred, 1), tf.argmax(label_te, 1)) 
 		print('argmax accuracy:', tf.reduce_mean(tf.cast(correctly_predicted, tf.float32)).eval())
+		f.write('argmax accuracy:'+str(tf.reduce_mean(tf.cast(correctly_predicted, tf.float32)).eval()))
+		f.flush()
+	f.close()
                  
