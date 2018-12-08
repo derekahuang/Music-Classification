@@ -7,7 +7,7 @@ N_FFT = 512
 HOP_LENGTH = N_FFT // 2
 N_MELS = 64 
 
-def log_melspectrogram(data, log=True, plot=False):
+def log_melspectrogram(data, log=True, plot=False, num='', genre=""):
 
 	melspec = lb.feature.melspectrogram(y=data, hop_length = HOP_LENGTH, n_fft = N_FFT, n_mels = N_MELS)
 
@@ -17,23 +17,23 @@ def log_melspectrogram(data, log=True, plot=False):
 	if plot:
 		melspec = melspec[np.newaxis, :]
 		plt.imshow(melspec.reshape((melspec.shape[1],melspec.shape[2])))
-		plt.savefig('melspec.png')
-	
-	return melspec        
+		plt.savefig('melspec'+str(num)+'_'+str(genre)+'.png')
 
-def batch_log_melspectrogram(data_list, log=True):
-	melspecs = np.asarray([dp.log_melspectrogram(i, log=log) for i in data_list])
-	melspecs = melspecs.reshape(spectrograms.shape[0], spectrograms.shape[1], spectrograms.shape[2], 1) #this line may or may not be neccesary idk
-	
+	return melspec
+
+def batch_log_melspectrogram(data_list, log=True, plot=False):
+	melspecs = np.asarray([log_melspectrogram(data_list[i],log=log,plot=plot) for i in range(len(data_list))])
+	#this line may or may not be neccesary idk
+	# melspecs = melspecs.reshape(melspecs.shape[0], melspecs.shape[1], melspecs.shape[2], 1)
 	return melspecs
 
-# training = np.load('gtzan/gtzan_tr.npy')
-# data_tr = np.delete(training, -1, 1)
-# label_tr = training[:,-1]
+training = np.load('gtzan/gtzan_tr.npy')
+data_tr = np.delete(training, -1, 1)
+label_tr = training[:,-1]
 
-# epoch = 200
+spects = batch_log_melspectrogram(data_tr)
 
-# spects = log_melspectrogram(data_tr[0], plot=True)
-
-
-
+print("Spects shape: ", spects.shape)
+print("Saving to ./melspects.npz")
+np.savez("melspects.npz", spects)
+print("Done")
