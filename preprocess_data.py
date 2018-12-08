@@ -30,10 +30,19 @@ def batch_log_melspectrogram(data_list, log=True, plot=False):
 training = np.load('gtzan/gtzan_tr.npy')
 data_tr = np.delete(training, -1, 1)
 label_tr = training[:,-1]
+spects_tr = batch_log_melspectrogram(data_tr)
 
-spects = batch_log_melspectrogram(data_tr)
+testing = np.load('gtzan/gtzan_te.npy')
+data_te = np.delete(testing, -1, 1)
+label_te = testing[:,-1]
+spects_te = batch_log_melspectrogram(data_te)
 
-print("Spects shape: ", spects.shape)
+crossval = np.load('gtzan/gtzan_cv.npy')
+data_cv = np.delete(crossval, -1, 1)
+label_cv = crossval[:,-1]
+spects_cv = batch_log_melspectrogram(data_cv)
+
 print("Saving to ./melspects.npz")
-np.savez("melspects.npz", spects)
+np.savez("melspects.npz", x_tr=spects_tr, y_tr=label_tr, x_te=spects_te, y_te=label_te, x_cv=spects_cv, y_cv=label_cv)
 print("Done")
+
