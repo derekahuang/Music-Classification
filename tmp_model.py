@@ -20,18 +20,23 @@ def metric(y_true, y_pred):
 def cnn(num_genres=10, input_shape=(64,173,1)):
     model = Sequential()
     model.add(Conv2D(64, kernel_size=(4, 4),
-                     activation='relu', kernel_regularizer=regularizers.l2(0.02),
+                     activation='relu', kernel_regularizer=regularizers.l2(0.04),
                      input_shape=input_shape))
     model.add(MaxPooling2D(pool_size=(2, 4)))
-    model.add(Conv2D(64, (3, 5), activation='relu', kernel_regularizer=regularizers.l2(0.02)))
+    model.add(Conv2D(64, (3, 5), activation='relu', kernel_regularizer=regularizers.l2(0.04)))
     model.add(MaxPooling2D(pool_size=(2, 4)))
-    model.add(Dropout(0.1))
+    model.add(Dropout(0.2))
+    model.add(Conv2D(64, (2, 2), activation='relu', kernel_regularizer=regularizers.l2(0.04)))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Dropout(0.2))
     model.add(Flatten())
-    model.add(Dense(32, activation='relu', kernel_regularizer=regularizers.l2(0.02)))
+    model.add(Dense(64, activation='relu', kernel_regularizer=regularizers.l2(0.04)))
+    model.add(Dropout(0.1))
+    model.add(Dense(32, activation='relu', kernel_regularizer=regularizers.l2(0.04)))
     model.add(Dropout(0.1))
     model.add(Dense(num_genres, activation='softmax'))
     model.compile(loss=keras.losses.categorical_crossentropy,
-                  optimizer=keras.optimizers.Adam(lr=1e-3),
+                  optimizer=keras.optimizers.Adam(lr=4e-4),
                   metrics=[metric])
     return(model)
 
@@ -46,7 +51,7 @@ class model(object):
 
     def train_model(self, input_spectrograms, labels, cv=True,
                 validation_spectrograms=None, validation_labels=None,
-                small_batch_size=160, max_iteration=500, print_interval=1):
+                small_batch_size=200, max_iteration=300, print_interval=1):
 
         """
         train the CNN model
