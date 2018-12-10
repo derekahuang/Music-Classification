@@ -31,12 +31,12 @@ def cnn(num_genres=10, input_shape=(64,173,1)):
     model.add(Dropout(0.2))
     model.add(Flatten())
     model.add(Dense(64, activation='relu', kernel_regularizer=regularizers.l2(0.04)))
-    model.add(Dropout(0.1))
+    model.add(Dropout(0.5))
     model.add(Dense(32, activation='relu', kernel_regularizer=regularizers.l2(0.04)))
-    model.add(Dropout(0.1))
+    #model.add(Dropout(0.1))
     model.add(Dense(num_genres, activation='softmax'))
     model.compile(loss=keras.losses.categorical_crossentropy,
-		  optimizer=keras.optimizers.Adadelta(lr=1.0, rho=0.95, epsilon=1e-08, decay=0.0),
+		  optimizer=keras.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0),
                   metrics=[metric])
     return(model)
 
@@ -88,7 +88,7 @@ class model(object):
                 # training_label = labels[training_idx]
                 x_batch = train_x[ jjj*small_batch_size : (jjj+1)*small_batch_size]
                 y_batch = train_y[ jjj*small_batch_size : (jjj+1)*small_batch_size]
-                print("starting batch\t", jjj, "\t Epoch:\t", iii)
+                #print("starting batch\t", jjj, "\t Epoch:\t", iii)
                 self.model.train_on_batch(x_batch, y_batch)
                 # if (jjj+1) % 50 == 0:
                 #     print("getting accuracy")
