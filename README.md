@@ -1,3 +1,3 @@
 # Music-Classification
 
-![poster](./CS_229_Poster.png)
+![poster](Music-Classification/CS229_Poster.png)
