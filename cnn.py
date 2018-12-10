@@ -189,17 +189,17 @@ def main():
 
 #################################################
 
-    if True:
-	model = keras.models.load_model('model84.082.0.h5', custom_objects={'metric': metric})
-	print("Saving confusion data...")
-	pred = model.predict_classes(x_te, verbose=1)
-	cnf_matrix = confusion_matrix(np.argmax(y_te, axis=1), pred)
-	np.set_printoptions(precision=1)
-	plt.figure()
-	plot_confusion_matrix(cnf_matrix, classes=song_labels, normalize=True, title='Normalized confusion matrix')
-	print(precision_recall_fscore_support(np.argmax(y_te, axis=1),pred, average='macro'))	
-	plt.savefig("matrix",format='png', dpi=1000)
-	raise SystemExit
+#    if True:
+#	model = keras.models.load_model('model84.082.0.h5', custom_objects={'metric': metric})
+#	print("Saving confusion data...")
+#	pred = model.predict_classes(x_te, verbose=1)
+#	cnf_matrix = confusion_matrix(np.argmax(y_te, axis=1), pred)
+#	np.set_printoptions(precision=1)
+#	plt.figure()
+#	plot_confusion_matrix(cnf_matrix, classes=song_labels, normalize=True, title='Normalized confusion matrix')
+#	print(precision_recall_fscore_support(np.argmax(y_te, axis=1),pred, average='macro'))	
+#	plt.savefig("matrix",format='png', dpi=1000)
+#	raise SystemExit
     ann = model(cnn)
 
     for i in range(10):
