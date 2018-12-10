@@ -26,15 +26,13 @@ def cnn(num_genres=10, input_shape=(64,173,1)):
     model.add(BatchNormalization())
     model.add(MaxPooling2D(pool_size=(2, 4)))
     model.add(Conv2D(64, (3, 5), activation='relu'
-                    #, kernel_regularizer=regularizers.l2(0.04)
+                    , kernel_regularizer=regularizers.l2(0.04)
                     ))
-    model.add(BatchNormalization())
     model.add(MaxPooling2D(pool_size=(2, 4)))
     model.add(Dropout(0.2))
     model.add(Conv2D(64, (2, 2), activation='relu'
-        #, kernel_regularizer=regularizers.l2(0.04)
+        , kernel_regularizer=regularizers.l2(0.04)
         ))
-    model.add(BatchNormalization())
     model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(Dropout(0.2))
     model.add(Flatten())
@@ -59,7 +57,7 @@ class model(object):
 
     def train_model(self, input_spectrograms, labels, cv=True,
                 validation_spectrograms=None, validation_labels=None,
-                small_batch_size=200, max_iteration=300, print_interval=1
+                small_batch_size=200, max_iteration=300, print_interval=1,
                 test_x=None, test_y=None):
 
         validation_accuracy_list = []
@@ -93,8 +91,11 @@ class model(object):
             if it % print_interval == 0:
                 training_accuracy = self.model.evaluate(train_x, train_y)
                 testing_accuracy = self.model.evaluate(test_x, test_y)
-                print("\nTraining accuracy: %f\t Validation accuracy: %f\t Testing Accuracy: %f\n" %
+                print("\nTraining accuracy: %f\t Validation accuracy: %f\t Testing Accuracy: %f" %
                       (training_accuracy[1], validation_accuracy[1], testing_accuracy[1]))
+                print("\nTraining loss: %f    \t Validation loss: %f    \t Testing Loss: %f \n" %
+                      (training_accuracy[0], validation_accuracy[0], testing_accuracy[0]))
+                print( )
         if cv:
             return np.asarray(validation_accuracy_list)
 
@@ -135,9 +136,9 @@ def main():
     y_cv = np_utils.to_categorical(y_cv)
 
 #################################################
-    print(1)
+
     ann = model(cnn)
-    print(2)
+
     for i in range(10):
         print(i)
         validation_accuracies = ann.train_model(x_tr, y_tr, cv=True,
