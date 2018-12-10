@@ -1,11 +1,11 @@
 import numpy as np
+import tensorflow as tf
 import keras
+from keras import backend as K
 from keras.models import Sequential, load_model
 from keras.layers import Dense, Dropout, Flatten
 from keras.layers import Conv2D, MaxPooling2D
 from keras.layers import BatchNormalization
-from keras import backend as K
-import tensorflow as tf
 from keras.utils import np_utils
 from keras import regularizers
 from keras.engine.topology import Layer
@@ -59,27 +59,11 @@ class model(object):
 
     def train_model(self, input_spectrograms, labels, cv=True,
                 validation_spectrograms=None, validation_labels=None,
-                small_batch_size=200, max_iteration=300, print_interval=1):
-
-        """
-        train the CNN model
-        :param input_spectrograms: number of training examples * num of mel bands * number of fft windows * 1
-            type: 4D numpy array
-        :param labels: vectorized class labels
-            type:
-        :param cv: whether do cross validation
-        :param validation_spectrograms: data used for cross validation
-            type: as input_spectrogram
-        :param validation_labels: used for cross validation
-        :param small_batch_size: size of each training batch
-        :param max_iteration:
-            maximum number of iterations allowed for one training
-        :return:
-            trained model
-        """
+                small_batch_size=200, max_iteration=300, print_interval=1
+                test_x=None, test_y=None):
 
         validation_accuracy_list = []
-        for iii in range(max_iteration):
+        for it in range(max_iteration):
 
             # split training data into even batches
             m = len(input_spectrograms)
@@ -89,16 +73,13 @@ class model(object):
             train_x = input_spectrograms[batch_idx]
             train_y = labels[batch_idx]
 
-            for jjj in range(num_batches - 1):
-                # sample_idx = np.random.randint(input_spectrograms.shape[2] - num_fft_windows)
-                # training_idx = batch_idx[jjj * small_batch_size: (jjj + 1) * small_batch_size]
-                # training_data = input_spectrograms[training_idx, :, sample_idx:sample_idx+num_fft_windows, :]
-                # training_label = labels[training_idx]
-                x_batch = train_x[ jjj*small_batch_size : (jjj+1)*small_batch_size]
-                y_batch = train_y[ jjj*small_batch_size : (jjj+1)*small_batch_size]
-                print("starting batch\t", jjj, "\t Epoch:\t", iii)
+            for batch in range(num_batches):
+
+                x_batch = train_x[ batch*small_batch_size : (batch+1)*small_batch_size]
+                y_batch = train_y[ batch*small_batch_size : (batch+1)*small_batch_size]
+                # print("starting batch\t", batch, "\t Epoch:\t", it)
                 self.model.train_on_batch(x_batch, y_batch)
-                # if (jjj+1) % 50 == 0:
+                # if (batch+1) % 50 == 0:
                 #     print("getting accuracy")
                 #     training_accuracy = self.model.evaluate(train_x, train_y)
                 #     print("Training accuracy is: ", training_accuracy)
@@ -109,10 +90,11 @@ class model(object):
             else:
                 validation_accuracy = [-1.0, -1.0]
 
-            if iii % print_interval == 0:
-                training_accuracy = self.model.evaluate(train_x[:2000], train_y[:2000])
-                print("\nTraining accuracy: %f, Validation accuracy: %f\n" %
-                      (training_accuracy[1], validation_accuracy[1]))
+            if it % print_interval == 0:
+                training_accuracy = self.model.evaluate(train_x, train_y)
+                testing_accuracy = self.model.evaluate(test_x, test_y)
+                print("\nTraining accuracy: %f\t Validation accuracy: %f\t Testing Accuracy: %f\n" %
+                      (training_accuracy[1], validation_accuracy[1], testing_accuracy[1]))
         if cv:
             return np.asarray(validation_accuracy_list)
 
@@ -160,7 +142,8 @@ def main():
         print(i)
         validation_accuracies = ann.train_model(x_tr, y_tr, cv=True,
                                                 validation_spectrograms=x_cv,
-                                                validation_labels=y_cv)
+                                                validation_labels=y_cv,
+                                                test_x=x_te, test_y=y_te)
         diff = np.mean(validation_accuracies[-10:]) - np.mean(validation_accuracies[:10])
         if np.abs(diff) < 0.01:
             break
