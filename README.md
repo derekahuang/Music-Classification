@@ -1,3 +1,3 @@
 # Music-Classification
 
-![poster](Music-Classification/CS229_Poster.png)
+![poster](https://github.com/derekahuang/Music-Classification/blob/master/CS229_Poster.png)
