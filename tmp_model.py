@@ -36,7 +36,7 @@ def cnn(num_genres=10, input_shape=(64,173,1)):
     model.add(Dropout(0.1))
     model.add(Dense(num_genres, activation='softmax'))
     model.compile(loss=keras.losses.categorical_crossentropy,
-                  optimizer=keras.optimizers.Adam(lr=4e-4),
+		  optimizer=keras.optimizers.Adadelta(lr=1.0, rho=0.95, epsilon=1e-08, decay=0.0),
                   metrics=[metric])
     return(model)
 
