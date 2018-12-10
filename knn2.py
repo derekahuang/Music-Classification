@@ -47,11 +47,20 @@ if PCA_TOGGLE == True:
 	neigh = KNeighborsClassifier(n_neighbors=5, weights='distance')
 	neigh.fit(train_pca, y_tr)
 
-	preds = neigh.predict(cv_pca)
-	acc = np.sum(preds == y_cv)
-	acc = acc / len(y_cv)
-	print('Accuracy is {}'.format(acc))
-	print(preds)
+	train_preds = neigh.predict(train_pca)
+	train_acc = np.sum(train_preds == y_tr)
+	train_acc = train_acc / len(y_tr)
+
+	cv_preds = neigh.predict(cv_pca)
+	cv_acc = np.sum(cv_preds == y_cv)
+	cv_acc = cv_acc / len(y_cv)
+
+	test_preds = neigh.predict(test_pca)
+	test_acc = np.sum(test_preds == y_te)
+	test_acc = test_acc / len(y_te)
+
+	print('Train: ', train_acc, "\tCV: ", cv_acc, "\tTest: ", test_acc)
+	# print(preds)
 
 else:
 	neigh2 = KNeighborsClassifier(n_neighbors=10, weights='distance')

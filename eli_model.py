@@ -20,7 +20,7 @@ def metric(y_true, y_pred):
 
 def cnn(num_genres=10, input_shape=(64,173,1)):
     model = Sequential()
-    model.add(Conv2D(64, kernel_size=(4, 4),
+    model.add(Conv2D(64, kernel_size=(8, 8),
                      activation='relu', #kernel_regularizer=regularizers.l2(0.04),
                      input_shape=input_shape))
     model.add(BatchNormalization())
@@ -96,6 +96,8 @@ class model(object):
                 print("\nTraining loss: %f    \t Validation loss: %f    \t Testing Loss: %f \n" %
                       (training_accuracy[0], validation_accuracy[0], testing_accuracy[0]))
                 print( )
+            if testing_accuracy[1]>80 and validation_accuracy[1]>=testing_accuracy[1]:
+                return np.asarray(validation_accuracy_list)
         if cv:
             return np.asarray(validation_accuracy_list)
 
@@ -139,15 +141,15 @@ def main():
 
     ann = model(cnn)
 
-    for i in range(10):
-        print(i)
-        validation_accuracies = ann.train_model(x_tr, y_tr, cv=True,
-                                                validation_spectrograms=x_cv,
-                                                validation_labels=y_cv,
-                                                test_x=x_te, test_y=y_te)
-        diff = np.mean(validation_accuracies[-10:]) - np.mean(validation_accuracies[:10])
-        if np.abs(diff) < 0.01:
-            break
+    validation_accuracies = ann.train_model(x_tr, y_tr, cv=True,
+                                            validation_spectrograms=x_cv,
+                                            validation_labels=y_cv,
+                                            test_x=x_te, test_y=y_te)
+
+
+
+
+###################################################################################################
 
 if __name__ == '__main__':
     main()

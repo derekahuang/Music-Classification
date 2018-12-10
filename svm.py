@@ -41,8 +41,23 @@ print(pca.n_components_)
 classifier = svm.SVC(gamma='scale', verbose=True)
 classifier.fit(train_pca, y_tr)
 
-preds = classifier.predict(cv_pca)
-acc = np.sum(preds == y_cv)
-acc = acc / len(y_cv)
-print('Accuracy is {}'.format(acc))
-print(preds)
+# preds = classifier.predict(cv_pca)
+# acc = np.sum(preds == y_cv)
+# acc = acc / len(y_cv)
+# print('Accuracy is {}'.format(acc))
+# print(preds)
+
+train_preds = classifier.predict(train_pca)
+train_acc = np.sum(train_preds == y_tr)
+train_acc = train_acc / len(y_tr)
+
+cv_preds = classifier.predict(cv_pca)
+cv_acc = np.sum(cv_preds == y_cv)
+cv_acc = cv_acc / len(y_cv)
+
+test_preds = classifier.predict(test_pca)
+test_acc = np.sum(test_preds == y_te)
+test_acc = test_acc / len(y_te)
+
+print('Train: ', train_acc, "\tCV: ", cv_acc, "\tTest: ", test_acc)
+
