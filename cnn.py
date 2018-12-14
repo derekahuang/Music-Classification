@@ -125,13 +125,14 @@ class model(object):
                 validation_accuracy = self.model.evaluate(val_x, val_y)
                 training_accuracy = self.model.evaluate(train_x, train_y)
                 testing_accuracy = self.model.evaluate(test_x, test_y)
+                # print of test error used only after development of the model
                 print("\nTraining accuracy: %f\t Validation accuracy: %f\t Testing Accuracy: %f" %
                       (training_accuracy[1], validation_accuracy[1], testing_accuracy[1]))
                 print("\nTraining loss: %f    \t Validation loss: %f    \t Testing Loss: %f \n" %
                       (training_accuracy[0], validation_accuracy[0], testing_accuracy[0]))
                 print( )
 
-            if (validation_accuracy[1] > .8 and testing_accuracy[1] > .8):
+            if (validation_accuracy[1] > .81):
                 print("Saving confusion data...")
                 model_name = "model" + str(100*validation_accuracy[1]) + str(100*testing_accuracy[1]) + ".h5"
                 self.model.save(model_name) 
