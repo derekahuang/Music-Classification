@@ -15,6 +15,7 @@ import matplotlib
 matplotlib.use("Agg")
 from matplotlib import pyplot as plt
 import itertools
+
 ###################################################################################################
 
 def plot_confusion_matrix(cm, classes,
@@ -56,6 +57,8 @@ def plot_confusion_matrix(cm, classes,
 
 song_labels = ["Blues","Classical","Country","Disco","Hip hop","Jazz","Metal","Pop","Reggae","Rock"]
 
+###################################################################################################
+
 def metric(y_true, y_pred):
     return K.mean(K.equal(K.argmax(y_true, axis=1), K.argmax(y_pred, axis=1)))
 
@@ -96,40 +99,30 @@ class model(object):
     def __init__(self, ann_model):
         self.model = ann_model()
 
-    def train_model(self, input_spectrograms, labels, cv=True,
-                validation_spectrograms=None, validation_labels=None,
+    def train_model(self, train_x, train_y,
+                val_x=None, val_y=None,
                 small_batch_size=200, max_iteration=300, print_interval=1,
                 test_x=None, test_y=None):
 
-        validation_accuracy_list = []
+        m = len(train_x)
+
         for it in range(max_iteration):
 
             # split training data into even batches
-            m = len(input_spectrograms)
             batch_idx = np.random.permutation(m)
+            train_x = train_x[batch_idx]
+            train_y = train_y[batch_idx]
+
             num_batches = int(m / small_batch_size)
-
-            train_x = input_spectrograms[batch_idx]
-            train_y = labels[batch_idx]
-
             for batch in range(num_batches):
 
                 x_batch = train_x[ batch*small_batch_size : (batch+1)*small_batch_size]
                 y_batch = train_y[ batch*small_batch_size : (batch+1)*small_batch_size]
-                # print("starting batch\t", batch, "\t Epoch:\t", it)
+                print("starting batch\t", batch, "\t Epoch:\t", it)
                 self.model.train_on_batch(x_batch, y_batch)
-                # if (batch+1) % 50 == 0:
-                #     print("getting accuracy")
-                #     training_accuracy = self.model.evaluate(train_x, train_y)
-                #     print("Training accuracy is: ", training_accuracy)
-
-            if cv:
-                validation_accuracy = self.model.evaluate(validation_spectrograms, validation_labels)
-                validation_accuracy_list.append(validation_accuracy[1])
-            else:
-                validation_accuracy = [-1.0, -1.0]
 
             if it % print_interval == 0:
+                validation_accuracy = self.model.evaluate(val_x, val_y)
                 training_accuracy = self.model.evaluate(train_x, train_y)
                 testing_accuracy = self.model.evaluate(test_x, test_y)
                 print("\nTraining accuracy: %f\t Validation accuracy: %f\t Testing Accuracy: %f" %
@@ -137,19 +130,18 @@ class model(object):
                 print("\nTraining loss: %f    \t Validation loss: %f    \t Testing Loss: %f \n" %
                       (training_accuracy[0], validation_accuracy[0], testing_accuracy[0]))
                 print( )
-		if (validation_accuracy[1] > .8 and testing_accuracy[1] > .8):
-			print("Saving confusion data...")
-			model_name = "model" + str(100*validation_accuracy[1]) + str(100*testing_accuracy[1]) + ".h5"
-			self.model.save(model_name)	
-			pred = self.model.predict_classes(test_x, verbose=1)
-			cnf_matrix = confusion_matrix(np.argmax(test_y, axis=1), pred)
-			np.set_printoptions(precision=2)
-			plt.figure()
-			plot_confusion_matrix(cnf_matrix, classes=song_labels, normalize=True, title='Normalized confusion matrix')
-			print(precision_recall_fscore_support(np.argmax(test_y, axis=1),pred, average='macro'))	
-			plt.savefig(str(batch))
-        if cv:
-            return np.asarray(validation_accuracy_list)
+
+            if (validation_accuracy[1] > .8 and testing_accuracy[1] > .8):
+                print("Saving confusion data...")
+                model_name = "model" + str(100*validation_accuracy[1]) + str(100*testing_accuracy[1]) + ".h5"
+                self.model.save(model_name) 
+                pred = self.model.predict_classes(test_x, verbose=1)
+                cnf_matrix = confusion_matrix(np.argmax(test_y, axis=1), pred)
+                np.set_printoptions(precision=2)
+                plt.figure()
+                plot_confusion_matrix(cnf_matrix, classes=song_labels, normalize=True, title='Normalized confusion matrix')
+                print(precision_recall_fscore_support(np.argmax(test_y, axis=1),pred, average='macro')) 
+                plt.savefig(str(batch))
 
 ###################################################################################################
 
@@ -159,82 +151,74 @@ def main():
 
 # Data stuff
 
-#    data = load_data.loadall('melspects.npz')
-#
-#    x_tr = data['x_tr']
-#    y_tr = data['y_tr']
-#    x_te = data['x_te']
-#    y_te = data['y_te']
-#    x_cv = data['x_cv']
-#    y_cv = data['y_cv']
-#
-#    tr_idx = np.random.permutation(len(x_tr))
-#    te_idx = np.random.permutation(len(x_te))
-#    cv_idx = np.random.permutation(len(x_cv))
-#
-#    x_tr = x_tr[tr_idx]
-#    y_tr = y_tr[tr_idx]
-#    x_te = x_te[te_idx]
-#    y_te = y_te[te_idx]
-#    x_cv = x_cv[cv_idx]
-#    y_cv = y_cv[cv_idx]
-#
-#    x_tr = x_tr[:,:,:,np.newaxis]
-#    x_te = x_te[:,:,:,np.newaxis]
-#    x_cv = x_cv[:,:,:,np.newaxis]
-#
-#    y_tr = np_utils.to_categorical(y_tr)
-#    y_te = np_utils.to_categorical(y_te)
-#    y_cv = np_utils.to_categorical(y_cv)
-#
+    data = load_data.loadall('melspects.npz')
 
-training = np.load('gtzan/gtzan_tr.npy')
-x_tr = np.delete(training, -1, 1)
-label_tr = training[:,-1]
+    x_tr = data['x_tr']
+    y_tr = data['y_tr']
+    x_te = data['x_te']
+    y_te = data['y_te']
+    x_cv = data['x_cv']
+    y_cv = data['y_cv']
 
-test = np.load('gtzan/gtzan_te.npy')
-x_te = np.delete(test, -1, 1)
-label_te = test[:,-1]
+    tr_idx = np.random.permutation(len(x_tr))
+    te_idx = np.random.permutation(len(x_te))
+    cv_idx = np.random.permutation(len(x_cv))
 
-cv = np.load('gtzan/gtzan_cv.npy')
-x_cv = np.delete(cv, -1, 1)
-label_cv = test[:,-1]
+    x_tr = x_tr[tr_idx]
+    y_tr = y_tr[tr_idx]
+    x_te = x_te[te_idx]
+    y_te = y_te[te_idx]
+    x_cv = x_cv[cv_idx]
+    y_cv = y_cv[cv_idx]
 
-temp = np.zeros((len(label_tr),10))
-temp[np.arange(len(label_tr)),label_tr.astype(int)] = 1
-y_tr = temp
-temp = np.zeros((len(label_te),10))
-temp[np.arange(len(label_te)),label_te.astype(int)] = 1
-y_te = temp
-temp = np.zeros((len(label_cv),10))
-temp[np.arange(len(label_cv)),label_cv.astype(int)] = 1
-y_cv = temp
-del temp
+    x_tr = x_tr[:,:,:,np.newaxis]
+    x_te = x_te[:,:,:,np.newaxis]
+    x_cv = x_cv[:,:,:,np.newaxis]
+
+    y_tr = np_utils.to_categorical(y_tr)
+    y_te = np_utils.to_categorical(y_te)
+    y_cv = np_utils.to_categorical(y_cv)
+
+
+# training = np.load('gtzan/gtzan_tr.npy')
+# x_tr = np.delete(training, -1, 1)
+# label_tr = training[:,-1]
+
+# test = np.load('gtzan/gtzan_te.npy')
+# x_te = np.delete(test, -1, 1)
+# label_te = test[:,-1]
+
+# cv = np.load('gtzan/gtzan_cv.npy')
+# x_cv = np.delete(cv, -1, 1)
+# label_cv = test[:,-1]
+
+# temp = np.zeros((len(label_tr),10))
+# temp[np.arange(len(label_tr)),label_tr.astype(int)] = 1
+# y_tr = temp
+# temp = np.zeros((len(label_te),10))
+# temp[np.arange(len(label_te)),label_te.astype(int)] = 1
+# y_te = temp
+# temp = np.zeros((len(label_cv),10))
+# temp[np.arange(len(label_cv)),label_cv.astype(int)] = 1
+# y_cv = temp
+# del temp
 
 #################################################
 
 #    if True:
-#	model = keras.models.load_model('model84.082.0.h5', custom_objects={'metric': metric})
-#	print("Saving confusion data...")
-#	pred = model.predict_classes(x_te, verbose=1)
-#	cnf_matrix = confusion_matrix(np.argmax(y_te, axis=1), pred)
-#	np.set_printoptions(precision=1)
-#	plt.figure()
-#	plot_confusion_matrix(cnf_matrix, classes=song_labels, normalize=True, title='Normalized confusion matrix')
-#	print(precision_recall_fscore_support(np.argmax(y_te, axis=1),pred, average='macro'))	
-#	plt.savefig("matrix",format='png', dpi=1000)
-#	raise SystemExit
-    ann = model(cnn)
+#   model = keras.models.load_model('model84.082.0.h5', custom_objects={'metric': metric})
+#   print("Saving confusion data...")
+#   pred = model.predict_classes(x_te, verbose=1)
+#   cnf_matrix = confusion_matrix(np.argmax(y_te, axis=1), pred)
+#   np.set_printoptions(precision=1)
+#   plt.figure()
+#   plot_confusion_matrix(cnf_matrix, classes=song_labels, normalize=True, title='Normalized confusion matrix')
+#   print(precision_recall_fscore_support(np.argmax(y_te, axis=1),pred, average='macro'))   
+#   plt.savefig("matrix",format='png', dpi=1000)
+#   raise SystemExit
 
-    for i in range(10):
-        print(i)
-        validation_accuracies = ann.train_model(x_tr, y_tr, cv=True,
-                                                validation_spectrograms=x_cv,
-                                                validation_labels=y_cv,
-                                                test_x=x_te, test_y=y_te)
-        diff = np.mean(validation_accuracies[-10:]) - np.mean(validation_accuracies[:10])
-        if np.abs(diff) < 0.01:
-            break
+    ann = model(cnn)
+    ann.train_model(x_tr, y_tr, val_x=x_cv, val_y=y_cv, test_x=x_te, test_y=y_te)
 
 if __name__ == '__main__':
     main()
