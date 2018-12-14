@@ -159,33 +159,57 @@ def main():
 
 # Data stuff
 
-    data = load_data.loadall('melspects.npz')
+#    data = load_data.loadall('melspects.npz')
+#
+#    x_tr = data['x_tr']
+#    y_tr = data['y_tr']
+#    x_te = data['x_te']
+#    y_te = data['y_te']
+#    x_cv = data['x_cv']
+#    y_cv = data['y_cv']
+#
+#    tr_idx = np.random.permutation(len(x_tr))
+#    te_idx = np.random.permutation(len(x_te))
+#    cv_idx = np.random.permutation(len(x_cv))
+#
+#    x_tr = x_tr[tr_idx]
+#    y_tr = y_tr[tr_idx]
+#    x_te = x_te[te_idx]
+#    y_te = y_te[te_idx]
+#    x_cv = x_cv[cv_idx]
+#    y_cv = y_cv[cv_idx]
+#
+#    x_tr = x_tr[:,:,:,np.newaxis]
+#    x_te = x_te[:,:,:,np.newaxis]
+#    x_cv = x_cv[:,:,:,np.newaxis]
+#
+#    y_tr = np_utils.to_categorical(y_tr)
+#    y_te = np_utils.to_categorical(y_te)
+#    y_cv = np_utils.to_categorical(y_cv)
+#
 
-    x_tr = data['x_tr']
-    y_tr = data['y_tr']
-    x_te = data['x_te']
-    y_te = data['y_te']
-    x_cv = data['x_cv']
-    y_cv = data['y_cv']
+training = np.load('gtzan/gtzan_tr.npy')
+x_tr = np.delete(training, -1, 1)
+label_tr = training[:,-1]
 
-    tr_idx = np.random.permutation(len(x_tr))
-    te_idx = np.random.permutation(len(x_te))
-    cv_idx = np.random.permutation(len(x_cv))
+test = np.load('gtzan/gtzan_te.npy')
+x_te = np.delete(test, -1, 1)
+label_te = test[:,-1]
 
-    x_tr = x_tr[tr_idx]
-    y_tr = y_tr[tr_idx]
-    x_te = x_te[te_idx]
-    y_te = y_te[te_idx]
-    x_cv = x_cv[cv_idx]
-    y_cv = y_cv[cv_idx]
+cv = np.load('gtzan/gtzan_cv.npy')
+x_cv = np.delete(cv, -1, 1)
+label_cv = test[:,-1]
 
-    x_tr = x_tr[:,:,:,np.newaxis]
-    x_te = x_te[:,:,:,np.newaxis]
-    x_cv = x_cv[:,:,:,np.newaxis]
-
-    y_tr = np_utils.to_categorical(y_tr)
-    y_te = np_utils.to_categorical(y_te)
-    y_cv = np_utils.to_categorical(y_cv)
+temp = np.zeros((len(label_tr),10))
+temp[np.arange(len(label_tr)),label_tr.astype(int)] = 1
+y_tr = temp
+temp = np.zeros((len(label_te),10))
+temp[np.arange(len(label_te)),label_te.astype(int)] = 1
+y_te = temp
+temp = np.zeros((len(label_cv),10))
+temp[np.arange(len(label_cv)),label_cv.astype(int)] = 1
+y_cv = temp
+del temp
 
 #################################################
 
