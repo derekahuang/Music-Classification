@@ -11,6 +11,7 @@ grpcio==1.16.1
 h5py==2.9.0
 isort==4.3.17
 joblib==0.13.2
+Keras==2.2.4
 Keras-Applications==1.0.7
 Keras-Preprocessing==1.0.9
 kiwisolver==1.0.1
@@ -31,6 +32,7 @@ pylint==2.3.1
 pyparsing==2.4.0
 pyreadline==2.1
 python-dateutil==2.8.0
+PyYAML==5.1
 resampy==0.2.1
 scikit-learn==0.20.3
 scipy==1.2.1
