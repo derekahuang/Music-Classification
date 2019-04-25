@@ -66,7 +66,7 @@ else:
 	neigh2 = KNeighborsClassifier(n_neighbors=10, weights='distance')
 	neigh2.fit(train_sc, y_tr)
 
-	preds = neigh2.predict(cv_)
+	preds = neigh2.predict(cv_sc)
 	acc = np.sum(preds == y_cv)
 	acc = acc / len(y_cv)
 	print('Accuracy is {}'.format(acc))
